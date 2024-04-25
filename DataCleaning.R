@@ -1,5 +1,7 @@
 library(readr)
 library(dplyr)
+library(stringr) 
+
 
 ##loading the raw data
 TransPop = read_csv("TransPop.csv")
@@ -88,8 +90,37 @@ data.frame(table(Combined$SEXUALID))
 data.frame(table(Combined$SEX))
 data.frame(table(Combined$GENDER))
 
-##Column Clean
-##Spliting numbers and text content into to column for gender, race, sex, urbanity, etc
+##gender column cleaning
+Combined = Combined %>% 
+  mutate(Gender_text = str_extract(GENDER,"\\d"),
+         Gender_text = ifelse(Gender_text==3,1,Gender_text),
+         Gender_text = ifelse(Gender_text==4,2,Gender_text),
+         Gender_text = ifelse(Gender_text==1,"Man",Gender_text),
+         Gender_text = ifelse(Gender_text==2,"Woman",Gender_text),
+         Gender_text = ifelse(Gender_text==5,"GNB",Gender_text),
+         Gender_text = paste0(Data_source,Gender_text),
+         Gender_num = ifelse(Gender_text=="cisMan",1,Gender_text),
+         Gender_num = ifelse(Gender_text=="cisWoman",2,Gender_num),
+         Gender_num = ifelse(Gender_text=="transMan",3,Gender_num),
+         Gender_num = ifelse(Gender_text=="transWoman",4,Gender_num),
+         Gender_num = ifelse(Gender_text=="transGNB",5,Gender_num))
+
+##checking gender
+table(Combined$Gender_text)
+table(Combined$Gender_num)
+
+##splitting numbers category from text 
+Combined = Combined %>% 
+  mutate(SEXUALID_num = parse_number(SEXUALID),
+         HINC_num = parse_number(HINC),
+         PINC_num = parse_number(PINC),
+         EDU_num = parse_number(GEDUCATION),
+         Employ_num = parse_number(GEMPLOYMENT2010),
+         INC_Bracket_num = parse_number(GANN_INC),
+         Urban_num = parse_number(GURBAN))
+
+##Spliting numbers and text content into to column for race, sex, urbanity, etc
+
 ##clean the quesion columns to just numbers for easier analysis
 ## creating sum columns for outcome variables
 
