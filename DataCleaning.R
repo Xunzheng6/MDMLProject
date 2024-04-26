@@ -2,6 +2,7 @@ library(readr)
 library(dplyr)
 library(stringr) 
 library(tidyr)
+library(lme4)
 
 ##loading the raw data
 TransPop = read_csv("TransPop.csv")
@@ -263,9 +264,72 @@ Combined = Combined %>%
 
 ## Creating Race gender intersection
 Combined = Combined %>% 
-  mutate(Race_Gender = paste(Race_text,Gender_text))
+  mutate(Race_Gender = paste(Race_text,Gender_text),
+         Race_Gender2 = paste(Data_source,Race_text))
 data.frame(table(Combined$Race_Gender))
+
+## Descriptive Exploration
+Test1 = Combined %>% 
+  filter(Data_source=="trans")
+
+Test2 = Combined %>% 
+  filter(Data_source=="cis")
+
+mean(Test1$Kessler6) ## trans kessler
+mean(Test2$Kessler6) ## cis kessler
+
+summary(Test1$Kessler6) ## trans kessler
+summary(Test2$Kessler6) ## cis kessler
+sd(Test1$Kessler6) ## trans kessler
+sd(Test2$Kessler6) ## cis kessler
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 4.80    8.80   12.00   12.23   16.00   23.20 
+# > summary(Test2$Kessler6) ## cis kessler
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 4.800   5.600   7.200   8.187   9.600  24.000 
+  
+hist(Test1$Kessler6) ## trans kessler
+hist(Test2$Kessler6) ## cis kessler
+
+plot(density(Test1$Kessler6))
+plot(density(Test2$Kessler6))
+
+Gender_split = Combined %>% 
+  group_by(Gender_text) %>% 
+  summarise(mean(Kessler6))
+# <chr>                  <dbl>
+#   1 cisMan                  7.88
+# 2 cisWoman                8.47
+# 3 transGNB               13.5 
+# 4 transMan               11.7 
+# # 5 transWoman             11.8 
+
+##clean this up
+cisMan = Combined %>% 
+  filter(Gender_text=="cisMan")
+
+cisWoman = Combined %>% 
+  filter(Gender_text=="cisWoman")
+
+transGNB = Combined %>% 
+  filter(Gender_text=="transGNB")
+
+transMan = Combined %>% 
+  filter(Gender_text=="transMan")
+
+transWoman = Combined %>% 
+  filter(Gender_text=="transWoman")
+
+##make this plots look better
+plot(density(transWoman$Kessler6))
+plot(density(transMan$Kessler6))
+plot(density(transGNB$Kessler6))
+plot(density(cisWoman$Kessler6))
+plot(density(cisMan$Kessler6))
+
+data.frame(table(Combined$Race_Gender2))
 
 ##creating regional & divisional scores based on the state-level friendiness score
 ##connect two datasets together
 
+install.packages("lme4")
