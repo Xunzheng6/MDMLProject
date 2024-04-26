@@ -213,19 +213,19 @@ Every_dis = Combined %>%
 Combined$Every_dis = rowMeans(Every_dis,na.rm = TRUE)
 
 ##Social Support | 23 missing
-Socialsup = Combined %>% 
+SoSupport = Combined %>% 
   select(Q192A,Q192B,Q192C,Q192D,Q192E,Q192F,Q192G,Q192H,Q192I,Q192J,Q192K,Q192L)
-Combined$Socialsup = rowMeans(Socialsup,na.rm = TRUE)
+Combined$SoSupport = rowMeans(SoSupport,na.rm = TRUE)
 
 ##Social Support - family | 24 missing
-SocialsupFam = Combined %>% 
+SoSupportFAM = Combined %>% 
   select(Q192C,Q192D,Q192H,Q192K)
-Combined$SocialsupFam = rowMeans(SocialsupFam,na.rm = TRUE)
+Combined$SoSupportFAM = rowMeans(SoSupportFAM,na.rm = TRUE)
 
 ##Social Support - friend | 23 missing
-SocialsupFriend = Combined %>% 
+SoSupportFriend = Combined %>% 
   select(Q192F,Q192G,Q192I,Q192L)
-Combined$SocialsupFriend = rowMeans(SocialsupFriend,na.rm = TRUE)
+Combined$SoSupportFriend = rowMeans(SoSupportFriend,na.rm = TRUE)
 
 ##Future Expectations, Transpop Only
 NegExp = Combined %>% 
@@ -242,10 +242,29 @@ NonAffirm = Combined %>%
   select(Q45,Q46,Q47,Q48,Q49,Q50)
 Combined$NonAffirm = rowMeans(NonAffirm,na.rm = TRUE)
 
+##race column cleaning
+Combined = Combined %>% 
+  mutate(Race_text = str_extract(RACE,"\\d"),
+         Race_text = ifelse(Race_text==4,9,Race_text),
+         Race_text = ifelse(Race_text==5,9,Race_text),
+         Race_text = ifelse(Race_text==7,9,Race_text),
+         Race_text = ifelse(Race_text==1,"Asian",Race_text),
+         Race_text = ifelse(Race_text==2,"Black/AA",Race_text),
+         Race_text = ifelse(Race_text==3,"Hispanic/Latino",Race_text),
+         Race_text = ifelse(Race_text==6,"White",Race_text),
+         Race_text = ifelse(Race_text==8,"Multirace",Race_text),
+         Race_text = ifelse(Race_text==9,"Other",Race_text),
+         Race_num = ifelse(Race_text=="Asian",1,Race_text),
+         Race_num = ifelse(Race_text=="Black/AA",2,Race_num),
+         Race_num = ifelse(Race_text=="Hispanic/Latino",3,Race_num),
+         Race_num = ifelse(Race_text=="White",4,Race_num),
+         Race_num = ifelse(Race_text=="Multirace",5,Race_num),
+         Race_num = ifelse(Race_text=="Other",6,Race_num))
 
 ## Creating Race gender intersection
-sum(is.na(Combined$RACE))
-
+Combined = Combined %>% 
+  mutate(Race_Gender = paste(Race_text,Gender_text))
+data.frame(table(Combined$Race_Gender))
 
 ##creating regional & divisional scores based on the state-level friendiness score
 ##connect two datasets together
