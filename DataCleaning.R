@@ -287,12 +287,16 @@ sd(Test2$Kessler6) ## cis kessler
 # > summary(Test2$Kessler6) ## cis kessler
 # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 # 4.800   5.600   7.200   8.187   9.600  24.000 
-  
+
+
+
+
 hist(Test1$Kessler6) ## trans kessler
 hist(Test2$Kessler6) ## cis kessler
 
 plot(density(Test1$Kessler6))
 plot(density(Test2$Kessler6))
+
 
 Gender_split = Combined %>% 
   group_by(Gender_text) %>% 
@@ -320,16 +324,221 @@ transMan = Combined %>%
 transWoman = Combined %>% 
   filter(Gender_text=="transWoman")
 
-##make this plots look better
+##make this plots look better 
 plot(density(transWoman$Kessler6))
 plot(density(transMan$Kessler6))
 plot(density(transGNB$Kessler6))
 plot(density(cisWoman$Kessler6))
 plot(density(cisMan$Kessler6))
 
+data.frame(table(Combined$Race_Gender))
 data.frame(table(Combined$Race_Gender2))
 
 ##creating regional & divisional scores based on the state-level friendiness score
 ##connect two datasets together
 
 install.packages("lme4")
+
+#############################################
+### MAKE PRETTY TABLES & PLOTS!!!!###
+#############################################
+
+################# for the survey response distribution############################
+# Calculate summary statistics for Kessler6 in Test1 dataset ## trans kessler
+summary_stats_test1 <- Test1 %>%
+  summarise(
+    Mean_Kessler6 = mean(Kessler6, na.rm = TRUE),
+    Median_Kessler6 = median(Kessler6, na.rm = TRUE),
+    SD_Kessler6 = sd(Kessler6, na.rm = TRUE),
+    Min_Kessler6 = min(Kessler6, na.rm = TRUE),
+    Max_Kessler6 = max(Kessler6, na.rm = TRUE),
+    N = n()
+  )
+
+# Print the table
+print(summary_stats_test1)
+
+# Calculate summary statistics for Kessler6 in Test2 dataset ## cis kessler
+summary_stats_test2 <- Test2 %>%
+  summarise(
+    Mean_Kessler6 = mean(Kessler6, na.rm = TRUE),
+    Median_Kessler6 = median(Kessler6, na.rm = TRUE),
+    SD_Kessler6 = sd(Kessler6, na.rm = TRUE),
+    Min_Kessler6 = min(Kessler6, na.rm = TRUE),
+    Max_Kessler6 = max(Kessler6, na.rm = TRUE),
+    N = n()
+  )
+
+# Print the table
+print(summary_stats_test2)
+
+
+#density plots for Kessler by trans and cis survey responses
+
+# Plot density of Test1$Kessler6 with label "trans survey responses"
+plot(density(Test1$Kessler6), main = "Density Comparison of Kessler for trans and cis survey responses", 
+     xlab = "Kessler Scores (psychological distress)", ylab = "Density", col = "blue", 
+     xlim = range(c(Test1$Kessler6, Test2$Kessler6)), ylim = c(0, 0.2))   # Adjust the x-axis limits to fit both densities
+
+# Add density of Test2$Kessler6 to the same plot with label "cis survey responses"
+lines(density(Test2$Kessler6), col = "green")
+
+# Add a legend with relabeled entries
+legend("topright", legend = c("trans survey responses", "cis survey responses"), col = c("blue", "green"), lty = 1, cex = 0.4)
+
+################################################################################
+library(dplyr)
+summary_stats_Gender<- Combined %>%
+  group_by(Gender_text) %>%
+  summarise(
+    Mean_Kessler6 = mean(Kessler6, na.rm = TRUE),
+    Median_Kessler6 = median(Kessler6, na.rm = TRUE),
+    SD_Kessler6 = sd(Kessler6, na.rm = TRUE),
+    Min_Kessler6 = min(Kessler6, na.rm = TRUE),
+    Max_Kessler6 = max(Kessler6, na.rm = TRUE),
+    N = n()
+  )
+
+# View the summary statistics
+print(summary_stats_Gender)
+
+# Create an empty plot
+plot(density(transWoman$Kessler6), main = "Density Comparison of Kessler by gender identity", 
+     xlab = "Kessler Scores (psychological distress)", ylab = "Density", col = "blue",
+      ylim = c(0, 0.2))
+
+# Add density plots for other groups
+lines(density(transMan$Kessler6), col = "red")
+lines(density(transGNB$Kessler6), col = "green")
+lines(density(cisWoman$Kessler6), col = "purple")
+lines(density(cisMan$Kessler6), col = "orange")
+
+# Add a legend
+legend("topright", legend = c("Trans Woman", "Trans Man", "Gender Non-Binary", "Cis Woman", "Cis Man"), 
+       col = c("blue", "red", "green", "purple", "orange"), lty = 1, cex = 0.45)
+
+
+################################################################################
+# Group by Race_Gender and calculate summary statistics for Kessler6
+summary_stats_Race_Gender <- Combined %>%
+  group_by(Race_Gender) %>%
+  summarise(
+    Mean_Kessler6 = mean(Kessler6, na.rm = TRUE),
+    Median_Kessler6 = median(Kessler6, na.rm = TRUE),
+    SD_Kessler6 = sd(Kessler6, na.rm = TRUE),
+    Min_Kessler6 = min(Kessler6, na.rm = TRUE),
+    Max_Kessler6 = max(Kessler6, na.rm = TRUE),
+    N = n()
+  )
+
+# View the summary statistics
+print(summary_stats_Race_Gender )
+
+# Group by Race_Gender2 and calculate summary statistics for Kessler6
+summary_stats_Race_Gender2 <- Combined %>%
+  group_by(Race_Gender2) %>%
+  summarise(
+    Mean_Kessler6 = mean(Kessler6, na.rm = TRUE),
+    Median_Kessler6 = median(Kessler6, na.rm = TRUE),
+    SD_Kessler6 = sd(Kessler6, na.rm = TRUE),
+    Min_Kessler6 = min(Kessler6, na.rm = TRUE),
+    Max_Kessler6 = max(Kessler6, na.rm = TRUE),
+    N = n()
+  )
+
+# View the summary statistics
+print(summary_stats_Race_Gender2 )
+
+# Load required libraries
+library(ggplot2)
+
+
+# Create a bar plot for mean Kessler6 scores for each category of Race_Gender2
+ggplot(summary_stats_Race_Gender2, aes(x = Race_Gender2, y = Mean_Kessler6)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Mean Kessler6 Scores by Race/Gender", x = "Race/Gender", y = "Mean Kessler6 Score") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+
+# Create a violin plot
+# Define custom colors for each race
+race_colors <- c("cis Asian" = "#ADD8E6", "trans Asian" = "#4169E1",
+                 "cis Black/AA" = "#FFA07A", "trans Black/AA" = "#8B4513",
+                 "cis Hispanic/Latino" = "#98FB98", "trans Hispanic/Latino" = "#228B22",
+                 "cis Multirace" = "#FFD700", "trans Multirace" = "#B8860B",
+                 "cis Other" = "#FFC0CB", "trans Other" = "#FF69B4",
+                 "cis White" = "#F0FFFF", "trans White" = "#4682B4")
+
+# Reorder Race_Gender2 factor levels to place cis and trans groups next to each other
+Combined$Race_Gender2 <- factor(Combined$Race_Gender2, levels = c("cis Asian", "trans Asian", "cis Black/AA", "trans Black/AA", 
+                                                                  "cis Hispanic/Latino", "trans Hispanic/Latino", "cis Multirace", "trans Multirace",
+                                                                  "cis Other", "trans Other", "cis White", "trans White"))
+ggplot(Combined, aes(x = Race_Gender2, y = Kessler6, fill = Race_Gender2)) +
+  geom_violin(color = "blue") +
+  geom_boxplot(width = 0.1, fill = "white", color = "blue", outlier.shape = NA) +
+  scale_fill_manual(values = race_colors) +  # Specify custom colors
+  labs(title = "Distribution of Kessler Scores by Race/Gender",
+       x = "Race/Gender",
+       y = "Kessler6 Score (psychological distress)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  + # Rotate x-axis labels
+  guides(fill = FALSE) 
+
+
+################################################################################
+# Group by Race_Gender2 and GCENREG and calculate summary statistics for Kessler6
+summary_stats_Race_Gender2_GCENREG <- Combined %>%
+  group_by(Race_Gender2, GCENREG) %>%
+  summarise(
+    Mean_Kessler6 = mean(Kessler6, na.rm = TRUE),
+    Median_Kessler6 = median(Kessler6, na.rm = TRUE),
+    SD_Kessler6 = sd(Kessler6, na.rm = TRUE),
+    Min_Kessler6 = min(Kessler6, na.rm = TRUE),
+    Max_Kessler6 = max(Kessler6, na.rm = TRUE),
+    N = n()
+  )
+
+
+# View the summary statistics
+print(summary_stats_Race_Gender2_GCENREG)
+View(summary_stats_Race_Gender2_GCENREG)
+
+# Group by Race_Gender2 and GURBAN and calculate summary statistics for Kessler6
+summary_stats_Race_Gender2_GURBAN <- Combined %>%
+  group_by(Race_Gender2, GURBAN) %>%
+  summarise(
+    Mean_Kessler6 = mean(Kessler6, na.rm = TRUE),
+    Median_Kessler6 = median(Kessler6, na.rm = TRUE),
+    SD_Kessler6 = sd(Kessler6, na.rm = TRUE),
+    Min_Kessler6 = min(Kessler6, na.rm = TRUE),
+    Max_Kessler6 = max(Kessler6, na.rm = TRUE),
+    N = n()
+  )
+
+# View the summary statistics
+print(summary_stats_Race_Gender2_GURBAN)
+View(summary_stats_Race_Gender2_GURBAN)
+
+################################################################################
+# Group by Race_Gender2 and plot association between Kessler6 and miles away from clinic
+
+# Define custom colors for each race
+race_colors <- c("cis Asian" = "#ADD8E6", "trans Asian" = "#4169E1",
+                 "cis Black/AA" = "#FFA07A", "trans Black/AA" = "#8B4513",
+                 "cis Hispanic/Latino" = "#98FB98", "trans Hispanic/Latino" = "#228B22",
+                 "cis Multirace" = "#FFD700", "trans Multirace" = "#B8860B",
+                 "cis Other" = "#FFC0CB", "trans Other" = "#FF69B4",
+                 "cis White" = "#F0FFFF", "trans White" = "#4682B4")
+
+# Create scatterplots with lines of best fit, custom colors, and exclude data points with miles over 200
+scatterplots <- ggplot(Combined, aes(x = GMILESAWAY, y = Kessler6, color = Race_Gender2)) +
+  geom_point(data = subset(Combined, GMILESAWAY <= 200)) +  # Exclude data points with GMILESAWAY over 200
+  geom_smooth(data = subset(Combined, GMILESAWAY <= 200), method = "lm", se = FALSE) +  # Add lines of best fit
+  scale_color_manual(values = race_colors) +  # Apply custom colors
+  facet_wrap(~ Race_Gender2, scales = "free") +  # Separate plots for each category
+  labs(x = "Miles Away from LGBT Health Care Center", y = "Kessler Score (psychological distress)") +  # Label axes
+  theme_minimal()
+
+# Print the scatterplots with lines of best fit and custom colors
+print(scatterplots)
