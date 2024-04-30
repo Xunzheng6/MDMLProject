@@ -1,7 +1,7 @@
-# Time to do some web scraping! 
-# Purpose: scrape data about laws/policies that impact LGBTQ individuals from the Movement Advancement Project at https://www.lgbtmap.org/equality-maps
-# Output: a tibble (policy_scrape_table) with each row representing a state and each column representing a policy tally related to sexual orientation (SO) or gender identity (GI)
-# Last updated: April 22, 2024 by CW
+## Time to do some web scraping! 
+## Purpose: scrape data about laws/policies that impact LGBTQ individuals from the Movement Advancement Project at https://www.lgbtmap.org/equality-maps
+## Output: a tibble (policy_scrape_table) with each row representing a state and each column representing a policy tally related to sexual orientation (SO) or gender identity (GI)
+## Last updated: April 30, 2024 by CW
 
 # Load packages
 library(rvest)
@@ -61,10 +61,9 @@ policy_scrape_table <- cleaned_table %>%
 # Check out our table!
 print(policy_scrape_table)
 
+## Make table grouped by census region
 
-###under construction
-
-# Define regions and divisions
+# Define regions
 region_mapping <- data.frame(
   state = c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
             "New Jersey", "New York", "Pennsylvania",
@@ -81,21 +80,23 @@ region_mapping <- data.frame(
              rep("West", 12))
 )
 
-# Clean the data to remove non-states and merge with region info
+# Clean data to remove non-states and merge with region info
 cleaned_table2 <- policy_scrape_table %>%
   filter(state %in% region_mapping$state) %>%
   left_join(region_mapping, by = "state")
 
 # Convert potential character columns that should be numeric to numeric
 numeric_columns <- c("policy_tally_SO","policy_tally_GI","all_tally")
-
 cleaned_table2 <- cleaned_table2 %>%
-  mutate(across(all_of(numeric_columns), ~as.numeric(as.character(.)), .names = "num_{.col}"))
+  mutate(across(all_of(numeric_columns), ~as.numeric(as.character(.))))
 
-# Group by Region and calculate average scores
+# Group by Region and calculate average scores for policy tallys
 grouped_by_region <- cleaned_table2 %>%
   group_by(Region) %>%
   summarise(across(where(is.numeric), mean, na.rm = TRUE))
 
-# Print the results
+# Print the region table!
 print(grouped_by_region)
+
+# Also export as csv in case we need it :)
+write.csv(grouped_by_region, "grouped_by_region.csv", row.names = FALSE)
