@@ -6,6 +6,7 @@
 # Load packages
 library(rvest)
 library(dplyr)
+library(tidyr)
 
 # URL of page containing table we want to scrape
 url <- "https://www.lgbtmap.org/equality-maps/index/policies?sortdir=asc&sort1=state&sort2=name"
@@ -59,3 +60,42 @@ policy_scrape_table <- cleaned_table %>%
 
 # Check out our table!
 print(policy_scrape_table)
+
+
+###under construction
+
+# Define regions and divisions
+region_mapping <- data.frame(
+  state = c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
+            "New Jersey", "New York", "Pennsylvania",
+            "Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin",
+            "Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota",
+            "Delaware", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia",
+            "Alabama", "Kentucky", "Mississippi", "Tennessee",
+            "Arkansas", "Louisiana", "Oklahoma", "Texas",
+            "Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming",
+            "Alaska", "California", "Hawaii", "Oregon", "Washington"),
+  Region = c(rep("Northeast", 9),
+             rep("Midwest", 12),
+             rep("South", 17),
+             rep("West", 12))
+)
+
+# Clean the data to remove non-states and merge with region info
+cleaned_table2 <- policy_scrape_table %>%
+  filter(state %in% region_mapping$state) %>%
+  left_join(region_mapping, by = "state")
+
+# Convert potential character columns that should be numeric to numeric
+numeric_columns <- c("policy_tally_SO","policy_tally_GI","all_tally")
+
+cleaned_table2 <- cleaned_table2 %>%
+  mutate(across(all_of(numeric_columns), ~as.numeric(as.character(.)), .names = "num_{.col}"))
+
+# Group by Region and calculate average scores
+grouped_by_region <- cleaned_table2 %>%
+  group_by(Region) %>%
+  summarise(across(where(is.numeric), mean, na.rm = TRUE))
+
+# Print the results
+print(grouped_by_region)
