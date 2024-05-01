@@ -3,6 +3,8 @@ library(dplyr)
 library(stringr) 
 library(tidyr)
 library(lme4)
+library(car)
+library(stats)
 
 getwd()
 setwd("/Users/kristylai/Desktop/MDMLProject-master")
@@ -270,71 +272,92 @@ Combined = Combined %>%
          Race_Gender2 = paste(Data_source,Race_text))
 data.frame(table(Combined$Race_Gender))
 
-## Descriptive Exploration
-Test1 = Combined %>% 
+## spliting the data
+Combined
+Combined$Race_Gender2 = relevel(as.factor(Combined$Race_Gender2),
+                                "cis White")
+Combined$Race_Gender = relevel(as.factor(Combined$Race_Gender),
+                                "White cisMan")
+
+levels((Combined$Race_Gender2))
+trans = Combined %>% 
   filter(Data_source=="trans")
+trans$Race_Gender2 = relevel(as.factor(trans$Race_Gender2),
+                             "trans White")
+trans$Race_text = relevel(as.factor(trans$Race_text),
+                             "White")
 
-Test2 = Combined %>% 
+Black_AA = Combined %>% 
+  filter(Race_text=="Black/AA")
+
+Hispanic
+
+levels((trans$Race_Gender2))
+
+cis = Combined %>% 
   filter(Data_source=="cis")
+cis$Race_Gender2 = relevel(as.factor(cis$Race_Gender2),
+                             "cis White")
+cis$Race_text = relevel(as.factor(cis$Race_text),
+                          "White")
 
-mean(Test1$Kessler6) ## trans kessler
-mean(Test2$Kessler6) ## cis kessler
+qqnorm(Combined$Kessler6, pch = 1, frame = FALSE)
+qqline(Combined$Kessler6, col = "steelblue", lwd = 2)
 
-summary(Test1$Kessler6) ## trans kessler
-summary(Test2$Kessler6) ## cis kessler
-sd(Test1$Kessler6) ## trans kessler
-sd(Test2$Kessler6) ## cis kessler
-# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# 4.80    8.80   12.00   12.23   16.00   23.20 
-# > summary(Test2$Kessler6) ## cis kessler
-# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# 4.800   5.600   7.200   8.187   9.600  24.000 
+summary(mod2)
 
 
+mod1 = lm(Kessler6 ~ Race_Gender+Socialwb+MultiEthnicID+Every_dis+Socialsup+AGE+GMILESAWAY+GANN_INC,
+          data = Combined)
+residual = resid(mod1)
+plot(fitted(mod1), residual) 
+abline(0,0) 
+
+summary(mod2)
+mod2 = lm(Kessler6 ~ Race_Gender2+Socialwb+MultiEthnicID+Every_dis+Socialsup+AGE+GMILESAWAY+GANN_INC,
+          data = trans)
+residual = resid(mod2)
+plot(fitted(mod2), residual) 
+abline(0,0) 
+summary(mod2)
+
+mod4 = lm(Kessler6 ~ Race_text+Gender_text+Socialwb+Every_dis+GMILESAWAY+AGE+POVERTYCAT+SEXUALID,
+          data = trans)
+summary(mod4)
+
+mod5 = lm(Kessler6 ~ Race_text+Gender_text+Socialwb+Every_dis+GMILESAWAY+AGE+POVERTYCAT+SEXUALID,
+          data = cis)
+summary(mod5)
+
+mod6 = lm(Kessler6 ~ Race_text+Gender_text+Socialwb+Every_dis+GMILESAWAY+AGE+POVERTYCAT+SEXUALID,
+          data = Combined)
+summary(mod6)
+
+mod7 = lm(Kessler6 ~ Data_source+Socialwb+Every_dis+GMILESAWAY+AGE+POVERTYCAT+SEXUALID,
+          data = Black_AA)
+summary(mod7)
+
+Combined$GCENREG <- substring(Combined$GCENREG, 5)
+table(Combined$GCENREG)
+Combined = left_join(Combined,grouped_by_region, by = c("GCENREG" = "Region"))
+
+mod8 = lmer(Kessler6 ~ Race_text+Gender_text+Socialwb+Every_dis+GMILESAWAY+AGE+POVERTYCAT+SEXUALID+num_policy_tally_GI+(1|GCENREG),
+            data = Combined)
+summary(mod8)
+
+mod8A = lm(Kessler6 ~ Race_text+Gender_text+Socialwb+num_policy_tally_GI+Every_dis+GMILESAWAY+AGE+POVERTYCAT+SEXUALID,
+          data = Combined)
+summary(mod8A)
+
+anova(mod6, mod8A)
 
 
-hist(Test1$Kessler6) ## trans kessler
-hist(Test2$Kessler6) ## cis kessler
-
-plot(density(Test1$Kessler6))
-plot(density(Test2$Kessler6))
+residual = resid(mod3)
+plot(fitted(mod3), residual) 
+abline(0,0) 
 
 
-Gender_split = Combined %>% 
-  group_by(Gender_text) %>% 
-  summarise(mean(Kessler6))
-# <chr>                  <dbl>
-#   1 cisMan                  7.88
-# 2 cisWoman                8.47
-# 3 transGNB               13.5 
-# 4 transMan               11.7 
-# # 5 transWoman             11.8 
 
-##clean this up
-cisMan = Combined %>% 
-  filter(Gender_text=="cisMan")
-
-cisWoman = Combined %>% 
-  filter(Gender_text=="cisWoman")
-
-transGNB = Combined %>% 
-  filter(Gender_text=="transGNB")
-
-transMan = Combined %>% 
-  filter(Gender_text=="transMan")
-
-transWoman = Combined %>% 
-  filter(Gender_text=="transWoman")
-
-##make this plots look better 
-plot(density(transWoman$Kessler6))
-plot(density(transMan$Kessler6))
-plot(density(transGNB$Kessler6))
-plot(density(cisWoman$Kessler6))
-plot(density(cisMan$Kessler6))
-
-data.frame(table(Combined$Race_Gender))
-data.frame(table(Combined$Race_Gender2))
 
 ##creating regional & divisional scores based on the state-level friendiness score
 ##connect two datasets together
